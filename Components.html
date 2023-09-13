@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Components</title>
+    <script type="importmap">
+        {
+          "imports": {
+            "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+          }
+        }
+      </script>
+</head>
+<body>
+    <!-- custom component -->
+    <div id="app">
+        <!-- raw HTML -->
+        <p v-html="htmlContent"></p>
+        <!-- Attribute Bindings  -->
+        <!-- javascript expressions inside syntax "{{}}" -->
+        <div v-bind:id="dynamicId">{{title}}</div>
+        
+
+        <!-- 2. Methods -->
+        <!-- 3. Reactivity fundamentals [ref() <script setup>] -->
+            <button @click="add">
+                Count: {{count}}
+            </button>
+        <!-- 5. Class and style bindings -->
+        <!-- a.Binding HTML class [v-bind:class] -->
+        <div v-bind:class="{a: aIsActive, b: bIsActive}">Binding HTML class</div>
+        <!-- b. Binding inline Styles [v-bind:style] -->
+        <div v-bind:style="{ backgroundColor: bgColor, color: textColor }">Styling using v-bind</div>
+        <!-- 6. List Rendering -->
+        <!-- a. v-for with: -->
+        <!-- an object, a range, on <template>, with v-if, with a component  -->
+        <p>an object</p>
+        <ul>
+            <li v-for="value in theObject">
+                {{value}}
+            </li>
+        </ul>
+        <p> a range (from 1 to 3)</p>
+        <ul>
+            <li v-for="n in 3">{{items[n-1].text}}</li>
+        </ul>
+        <p>on template with v-if (show finished ids)</p>
+        <template v-for="item in items">
+            <li  v-if="!item.finished">
+                {{ item.text }}
+            </li>
+        </template>
+
+        <p>v-for with component</p>
+        <my-component v-for="(item, index) in items"
+        :key="index"
+        :title="item.text"
+        :content="item.finished">
+        </my-component>
+        <!-- Event handling: Listening to events[v-on:click] -->
+        <!-- with Inline Handlers -->
+        <button @click="count++">
+            Count(inline handler):
+        </button>
+        <p> {{count}}</p>
+
+        <!-- method handler -->
+        <button @click="add">
+            Count(method handler): {{count}}
+        </button>
+
+        <!-- form input bindings -->
+        <!-- text input -->
+        <p>Text Input</p>
+        <p>Message: {{message}}</p>
+        <input v-model="message" placeholder="Edit this">
+        <!-- checkbox input -->
+        <p>checkbox input</p>
+        <input type="checkbox" id="checkbox" v-model="isChecked" />
+        <label for="checkbox">{{ isChecked }}</label>
+        <!-- radio input -->
+        <p>radio input, {{radioPicked}}</p>
+        <input type="radio" id="one" value="A" v-model="radioPicked" />
+        <label for="one">A</label>
+
+        <input type="radio" id="two" value="B" v-model="radioPicked" />
+        <label for="two">B</label>
+        <!-- select and text area -->
+        <p>selected: {{selected}}</p>
+        <select v-model="selected">
+            <option>Left</option>
+            <option>Right</option>
+            <option>Forward</option>
+        </select>
+        <!-- v-model modifiers[.lazy, .number, .trim] -->
+        <p>Message (lazy): {{message}}</p>
+        <input v-model.lazy="message" placeholder="Edit this">
+        <p>Message (number): {{numb}}</p>
+        <input v-model.number="numb" placeholder="Edit this">
+        <p>Message (trim): {{message}}</p>
+        <input v-model.trim="message" placeholder="Edit this">
+        <!-- watchers -->
+        <!-- component -->
+        <the-component></the-component>
+
+        </div>
+
+
+        <script type="module">
+            import {createApp, ref, reactive, watch} from 'vue';
+
+            const app = createApp( {
+                data() {
+                    return {
+                        message: "Hello world",
+                        numb:2,
+                        htmlContent: '<h1> this is heading text </h1>',
+                        dynamicId: 'dynamic-element-id',
+                        title: "Hello World Vue!",
+                        bgColor: 'grey',
+                        textColor: 'white',
+                        count:ref(0),
+                        aIsActive:false,
+                        bIsActive:true,
+                        isChecked:true,
+                        radioPicked:"none",
+                        selected: "none",
+
+                        // list rendering
+                        items: [
+                            {id: 1, text: 'Text1', finished:true},
+                            {id: 2, text: 'Text2', finished:false},
+                            {id: 3, text: 'Text3', finished:true},
+                            {id: 4, text: 'Text4', finished:false},
+                            {id: 5, text: 'Text5', finished:true},
+                            {id: 6, text: 'Text6', finished:false},
+                        ],
+                        theObject: reactive ({
+                            title:"ABC!@#",
+                            author:'John smith',
+                            publishedAt: '2005-02-23'
+                        }),
+                    };
+                }, methods: {
+                    add(){
+                        this.count++;
+                    }
+                },
+                watch: {
+                message(newVal, oldVal) {
+                    console.log('Msg changed from' + oldVal + " to " + newVal);
+                    },
+                },
+            });
+
+            app.component('MyComponent', {
+                template: `
+                <div>
+                    <h3>{{title}}</h3>
+                    <p>{{content}}</p>
+                </div>
+                `,
+                props: ['title', 'content'],
+            });
+
+            app.component('TheComponent', {
+  template: `
+    <div>
+      <h2>{{ title }}</h2>
+      <slot>This is a Component from TheComponent </slot>
+      <button @click="emitEvent">Click Here</button>
+    </div>
+  `,
+            props: {
+                title: String,
+            },
+
+            methods: {
+                emitEvent() {
+                    this.$emit('custom-event', 'Event message from component');
+                    console.log('custom-event', 'Event message from component');
+                },
+            },
+        });  
+            app.mount("#app");
+
+        </script>
+    
+<style>
+    .a {
+        background-color: brown;
+        color: white;
+    }
+    .b {
+        background-color: black;
+        color: white;
+    }
+</style>
+
+</body>
+</html>
